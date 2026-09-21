@@ -19,7 +19,11 @@ _client: AsyncMongoClient | None = None
 async def connect_to_mongo() -> None:
     global _client
     settings = get_settings()
-    _client = AsyncMongoClient(settings.mongodb_uri)
+    _client = AsyncMongoClient(
+        settings.mongodb_uri,
+        serverSelectionTimeoutMS=10000,
+        connectTimeoutMS=10000,
+    )
     await init_beanie(
         database=_client[settings.mongodb_db],
         document_models=[

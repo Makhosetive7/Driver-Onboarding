@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { api, type TokenResponse, type UserMe } from '../api/client';
+import { api, type TokenResponse, type UserMe, wakeApi } from '../api/client';
 
 type AuthContextValue = {
   user: UserMe | null;
@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    void wakeApi();
     refreshUser().finally(() => setLoading(false));
   }, [refreshUser]);
 

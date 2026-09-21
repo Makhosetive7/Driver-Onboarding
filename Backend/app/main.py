@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+import asyncio
+import logging
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,15 +17,33 @@ from app.api import (
 )
 from app.core.config import get_settings
 from app.db.mongo import close_mongo_connection, connect_to_mongo
-from app.db.seed import seed_demo_data
+from app.db.seed import seed_admin, seed_demo_data
+
+log = logging.getLogger("takeoff")
+
+
+async def _startup() -> None:
+    settings = get_settings()
+    try:
+        await asyncio.wait_for(connect_to_mongo(), timeout=20)
+        settings.upload_path.mkdir(parents=True, exist_ok=True)
+        if settings.is_development:
+            await seed_demo_data()
+        else:
+            await seed_admin()
+    except Exception:
+        log.exception("Startup database init failed")
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    await connect_to_mongo()
-    get_settings().upload_path.mkdir(parents=True, exist_ok=True)
-    await seed_demo_data()
+    task = asyncio.create_task(_startup())
     yield
+    task.cancel()
+    try:
+        await task
+    except (asyncio.CancelledError, Exception):
+        pass
     await close_mongo_connection()
 
 
@@ -37,6 +57,7 @@ settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,6 +83,7 @@ app.include_router(applications.router)
 app.include_router(admin.router)
 
 
+@app.get("/")
 @app.get("/api/health")
 def health():
     return {"status": "ok", "environment": settings.environment}

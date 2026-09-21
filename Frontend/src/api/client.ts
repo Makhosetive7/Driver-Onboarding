@@ -5,6 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 export const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 60000,
 });
 
 api.interceptors.request.use((config) => {
@@ -14,6 +15,14 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+export async function wakeApi(): Promise<void> {
+  try {
+    await api.get('/api/health', { timeout: 60000 });
+  } catch {
+    // Render free instances sleep; the next user action retries.
+  }
+}
 
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (!navigator.onLine) {
@@ -25,7 +34,10 @@ export function getErrorMessage(error: unknown, fallback: string): string {
     if (typeof detail === 'string') return detail;
     if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg;
     if (!ax.response) {
-      return "You're offline. Check your internet connection and try again.";
+      if (ax.code === 'ECONNABORTED') {
+        return 'The API took too long to respond. Render may be waking up — wait a few seconds and try again.';
+      }
+      return 'Cannot reach the API. If you are on the live site, the Render service may be sleeping — wait a few seconds and try again.';
     }
   }
   return fallback;

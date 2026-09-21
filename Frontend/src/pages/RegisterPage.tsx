@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { z } from 'zod';
-import { api, getErrorMessage, type TokenResponse } from '../api/client';
+import axios from 'axios';
+import { api, getErrorMessage, wakeApi, type TokenResponse } from '../api/client';
 import { AuthShell, AuthSwitchLink } from '../components/AuthShell';
 import {
   Alert,
@@ -61,6 +62,24 @@ export function RegisterPage() {
         },
       });
     } catch (err) {
+      if (axios.isAxiosError(err) && !err.response) {
+        await wakeApi();
+        try {
+          const { data } = await api.post<TokenResponse>('/api/auth/register', values);
+          await setSession(data.access_token);
+          navigate('/verify', {
+            state: {
+              message: `Account created. We've sent a verification code to ${values.phone}.`,
+            },
+          });
+          return;
+        } catch (retryErr) {
+          setError(
+            getErrorMessage(retryErr, 'We could not create your account. Please try again.'),
+          );
+          return;
+        }
+      }
       setError(getErrorMessage(err, 'We could not create your account. Please try again.'));
     }
   };
