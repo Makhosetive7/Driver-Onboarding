@@ -93,7 +93,7 @@ export function VehiclePage() {
 
   return (
     <FlowShell
-      step={3}
+      step={4}
       eyebrow="Fleet ready"
       title="Vehicle details"
       subtitle={`Tell us about the vehicle you will use for deliveries.${typeHint}`}

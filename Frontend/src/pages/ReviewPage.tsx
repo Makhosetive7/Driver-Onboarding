@@ -22,6 +22,7 @@ import {
   IDENTITY_TYPE_LABELS,
   VEHICLE_TYPE_LABELS,
 } from '../lib/labels';
+import { useAuth } from '../context/AuthContext';
 
 const Section = styled.section`
   border-top: 1px solid ${({ theme }) => theme.colors.border};
@@ -97,6 +98,7 @@ const DOC_LABELS: Record<string, string> = {
 
 export function ReviewPage() {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [data, setData] = useState<ApplicationReview | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState('');
@@ -130,6 +132,7 @@ export function ReviewPage() {
     setError('');
     try {
       const { data: app } = await api.post<ApplicationInfo>('/api/application/submit');
+      await refreshUser();
       navigate('/onboarding/submitted', { state: app });
     } catch (err) {
       setError(getErrorMessage(err, 'We could not submit your application. Please try again.'));
@@ -144,7 +147,7 @@ export function ReviewPage() {
 
   return (
     <FlowShell
-      step={5}
+      step={6}
       eyebrow="Almost there"
       title="Review application"
       subtitle="Check everything carefully before you submit."

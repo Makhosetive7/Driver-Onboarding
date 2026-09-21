@@ -53,23 +53,24 @@ App: http://localhost:5173
 
 ## Test credentials
 
+Demo accounts are seeded on API startup (idempotent). Sign in with email or phone.
+
 ### Admin reviewer
 
 | Field | Value |
 |---|---|
 | Email | `admin@takeoff.local` |
-| Password | `AdminPass123!` |
 | Phone | `+263770000001` |
+| Password | `AdminPass123!` |
 
-### Suggested driver (create via Sign up)
+### Demo drivers
 
-| Field | Value |
-|---|---|
-| Name | Test Driver |
-| Phone | `+263770000000` |
-| Email | `test.driver@example.com` |
-| Password | `TestPass123!` |
-| Vehicle | Toyota Corolla · `TEST 1234` |
+| Name | Email | Phone | Password | Application |
+|---|---|---|---|---|
+| Tendai Moyo | `tendai.moyo@takeoff.demo` | `+263771100001` | `DriverPass123!` | Approved |
+| Chiedza Ncube | `chiedza.ncube@takeoff.demo` | `+263771100002` | `DriverPass123!` | Pending review |
+| Farai Dube | `farai.dube@takeoff.demo` | `+263771100003` | `DriverPass123!` | Rejected |
+| Rudo Sibanda | `rudo.sibanda@takeoff.demo` | `+263771100004` | `DriverPass123!` | Draft (incomplete) |
 
 **Development OTP:** when `ENVIRONMENT=development`, the UI shows `Development OTP: 123456`.
 

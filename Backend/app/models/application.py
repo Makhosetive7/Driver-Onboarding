@@ -25,6 +25,6 @@ class Application(Document):
             IndexModel(
                 [("reference_number", ASCENDING)],
                 unique=True,
-                sparse=True,
+                partialFilterExpression={"reference_number": {"$type": "string"}},
             ),
         ]

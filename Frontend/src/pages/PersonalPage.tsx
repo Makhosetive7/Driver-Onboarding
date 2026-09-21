@@ -79,7 +79,7 @@ export function PersonalPage() {
 
   return (
     <FlowShell
-      step={1}
+      step={2}
       eyebrow="About you"
       title="Personal details"
       subtitle="Tell us a bit about yourself. Phone and email are already set from your account."

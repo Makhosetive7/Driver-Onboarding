@@ -11,13 +11,18 @@ from app.services.otp import (
     mask_phone,
     verify_user_otp,
 )
-from app.services.profile import get_or_create_profile, hydrate_profile
+from app.services.profile import (
+    driver_application_status,
+    get_or_create_profile,
+    hydrate_profile,
+)
 from app.services.storage import delete_stored_file, resolve_stored_file, save_upload
 
 __all__ = [
     "REQUIRED_DOCUMENTS",
     "create_otp",
     "delete_stored_file",
+    "driver_application_status",
     "generate_otp_code",
     "generate_reference_number",
     "get_or_create_application",

@@ -13,7 +13,7 @@ type AuthContextValue = {
   user: UserMe | null;
   token: string | null;
   loading: boolean;
-  setSession: (token: string, meta?: Partial<TokenResponse>) => Promise<void>;
+  setSession: (token: string, meta?: Partial<TokenResponse>) => Promise<UserMe | null>;
   refreshUser: () => Promise<UserMe | null>;
   logout: () => void;
 };
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (accessToken: string) => {
       localStorage.setItem('token', accessToken);
       setToken(accessToken);
-      await refreshUser();
+      return refreshUser();
     },
     [refreshUser],
   );

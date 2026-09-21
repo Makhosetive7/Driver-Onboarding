@@ -1,7 +1,7 @@
 import { FaCheck } from 'react-icons/fa6';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-const STEPS = ['Personal', 'Identity', 'Vehicle', 'Documents', 'Review'] as const;
+import { ONBOARDING_STEPS } from '../lib/onboarding';
 
 const Wrap = styled.div`
   margin: 0 0 1.35rem;
@@ -45,7 +45,7 @@ const Track = styled.ol`
   align-items: flex-start;
 `;
 
-const Step = styled.li<{ $state: 'done' | 'current' | 'todo' }>`
+const Step = styled.li<{ $state: 'done' | 'current' | 'todo'; $clickable: boolean }>`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -53,6 +53,7 @@ const Step = styled.li<{ $state: 'done' | 'current' | 'todo' }>`
   gap: 0.4rem;
   min-width: 0;
   position: relative;
+  cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
 
   &:not(:last-child)::after {
     content: '';
@@ -99,6 +100,7 @@ const Dot = styled.span<{ $state: 'done' | 'current' | 'todo' }>`
 const Name = styled.span<{ $active: boolean }>`
   font-size: 0.68rem;
   text-align: center;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -107,35 +109,46 @@ const Name = styled.span<{ $active: boolean }>`
   font-weight: ${({ $active }) => ($active ? 700 : 500)};
 
   @media (max-width: 480px) {
-    display: none;
+    font-size: 0.58rem;
+    white-space: normal;
   }
 `;
 
 type Props = { current: number };
 
 export function ProgressIndicator({ current }: Props) {
-  const pct = ((current - 1) / (STEPS.length - 1)) * 100;
+  const navigate = useNavigate();
+  const last = ONBOARDING_STEPS.length - 1;
+  const pct = last <= 0 ? 100 : ((current - 1) / last) * 100;
 
   return (
     <Wrap>
       <Meta>
         <span>
-          Step {current} of {STEPS.length}
+          Step {current} of {ONBOARDING_STEPS.length}
         </span>
-        <CurrentLabel>{STEPS[current - 1]}</CurrentLabel>
+        <CurrentLabel>{ONBOARDING_STEPS[current - 1]?.label}</CurrentLabel>
       </Meta>
       <Bar>
         <BarFill $pct={pct} />
       </Bar>
       <Track>
-        {STEPS.map((label, index) => {
+        {ONBOARDING_STEPS.map((step, index) => {
           const stepNum = index + 1;
           const state =
             stepNum < current ? 'done' : stepNum === current ? 'current' : 'todo';
+          const clickable = state === 'done' && step.path !== '/verify';
           return (
-            <Step key={label} $state={state}>
+            <Step
+              key={step.path}
+              $state={state}
+              $clickable={clickable}
+              onClick={() => {
+                if (clickable) navigate(step.path);
+              }}
+            >
               <Dot $state={state}>{state === 'done' ? <FaCheck /> : stepNum}</Dot>
-              <Name $active={state !== 'todo'}>{label}</Name>
+              <Name $active={state !== 'todo'}>{step.label}</Name>
             </Step>
           );
         })}

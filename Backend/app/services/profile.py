@@ -10,6 +10,16 @@ from app.models import (
 )
 
 
+async def driver_application_status(user_id: PydanticObjectId) -> str:
+    profile = await DriverProfile.find_one(DriverProfile.user_id == user_id)
+    if not profile:
+        return ApplicationStatus.DRAFT.value
+    application = await Application.find_one(Application.driver_id == profile.id)
+    if not application:
+        return ApplicationStatus.DRAFT.value
+    return application.status.value
+
+
 async def get_or_create_profile(user_id: PydanticObjectId) -> DriverProfile:
     profile = await DriverProfile.find_one(DriverProfile.user_id == user_id)
     if profile:

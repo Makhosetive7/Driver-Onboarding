@@ -129,7 +129,7 @@ export function DocumentsPage() {
 
   return (
     <FlowShell
-      step={4}
+      step={5}
       eyebrow="Uploads"
       title="Driver & vehicle documents"
       subtitle="Upload all required documents so we can complete your application review."

@@ -8,6 +8,7 @@ import { api, getErrorMessage, type TokenResponse } from '../api/client';
 import { AuthShell, AuthSwitchLink } from '../components/AuthShell';
 import { Alert, Button, ErrorText, Field, Input, Label } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { postAuthPath } from '../lib/routes';
 
 const schema = z.object({
   phone_or_email: z.string().min(1, 'Phone or email is required'),
@@ -39,14 +40,16 @@ export function LoginPage() {
     setError('');
     try {
       const { data } = await api.post<TokenResponse>('/api/auth/login', values);
-      await setSession(data.access_token);
-      if (data.role === 'ADMIN') {
-        navigate('/admin');
-      } else if (!data.phone_verified) {
-        navigate('/verify');
-      } else {
-        navigate('/dashboard');
-      }
+      const me = await setSession(data.access_token);
+      navigate(
+        postAuthPath(
+          me ?? {
+            role: data.role,
+            phone_verified: data.phone_verified,
+            application_status: null,
+          },
+        ),
+      );
     } catch (err) {
       setError(getErrorMessage(err, 'We could not sign you in. Please try again.'));
     }

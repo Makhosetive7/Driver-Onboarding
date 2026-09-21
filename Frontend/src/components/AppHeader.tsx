@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
+import { needsOnboarding, postAuthPath } from '../lib/routes';
 import { Brand, Button, HeaderBar } from './ui';
 
 const Shell = styled.div`
@@ -22,12 +23,7 @@ const Actions = styled.div`
 
 export function AppHeader({ showAuthActions = true }: { showAuthActions?: boolean }) {
   const { user, logout } = useAuth();
-  const homeTo =
-    user?.role === 'ADMIN'
-      ? '/admin'
-      : user?.phone_verified
-        ? '/dashboard'
-        : '/';
+  const homeTo = user ? postAuthPath(user) : '/';
 
   return (
     <Shell>
@@ -45,11 +41,15 @@ export function AppHeader({ showAuthActions = true }: { showAuthActions?: boolea
                   <Button as={Link} to="/admin" $variant="ghost">
                     Admin
                   </Button>
-                ) : user.phone_verified ? (
+                ) : !user.phone_verified ? null : needsOnboarding(user) ? (
+                  <Button as={Link} to="/onboarding/personal" $variant="ghost">
+                    Application
+                  </Button>
+                ) : (
                   <Button as={Link} to="/dashboard" $variant="ghost">
                     Rides
                   </Button>
-                ) : null}
+                )}
                 <Button $variant="ghost" type="button" onClick={logout}>
                   Sign out
                 </Button>

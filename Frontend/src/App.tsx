@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
+import { OnboardingGuard } from './components/OnboardingGuard';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { AdminDetailPage, AdminListPage } from './pages/AdminPages';
@@ -30,14 +31,18 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/verify" element={<VerifyOtpPage />} />
             </Route>
-            <Route element={<ProtectedRoute requireVerified />}>
+            <Route element={<ProtectedRoute requireVerified requireOnboarded />}>
               <Route path="/dashboard" element={<DriverDashboard />} />
-              <Route path="/onboarding/personal" element={<PersonalPage />} />
-              <Route path="/onboarding/identity" element={<IdentityPage />} />
-              <Route path="/onboarding/vehicle" element={<VehiclePage />} />
-              <Route path="/onboarding/documents" element={<DocumentsPage />} />
-              <Route path="/onboarding/review" element={<ReviewPage />} />
-              <Route path="/onboarding/submitted" element={<SubmittedPage />} />
+            </Route>
+            <Route element={<ProtectedRoute requireVerified />}>
+              <Route element={<OnboardingGuard />}>
+                <Route path="/onboarding/personal" element={<PersonalPage />} />
+                <Route path="/onboarding/identity" element={<IdentityPage />} />
+                <Route path="/onboarding/vehicle" element={<VehiclePage />} />
+                <Route path="/onboarding/documents" element={<DocumentsPage />} />
+                <Route path="/onboarding/review" element={<ReviewPage />} />
+                <Route path="/onboarding/submitted" element={<SubmittedPage />} />
+              </Route>
             </Route>
             <Route element={<ProtectedRoute requireAdmin />}>
               <Route path="/admin" element={<AdminListPage />} />

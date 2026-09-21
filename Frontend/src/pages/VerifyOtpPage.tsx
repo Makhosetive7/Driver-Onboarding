@@ -5,6 +5,7 @@ import { api, getErrorMessage } from '../api/client';
 import { FlowShell } from '../components/FlowShell';
 import { Alert, Button, ButtonRow, Muted } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { postAuthPath } from '../lib/routes';
 
 const OtpRow = styled.div`
   display: grid;
@@ -73,7 +74,7 @@ export function VerifyOtpPage() {
 
   useEffect(() => {
     if (user?.phone_verified) {
-      navigate('/dashboard', { replace: true });
+      navigate(postAuthPath(user), { replace: true });
       return;
     }
     void sendOtp(false);
@@ -94,7 +95,7 @@ export function VerifyOtpPage() {
     try {
       await api.post('/api/auth/verify-otp', { otp });
       await refreshUser();
-      navigate('/dashboard');
+      navigate('/onboarding/personal');
     } catch (err) {
       setError(getErrorMessage(err, 'We could not verify that code. Please try again.'));
       verifying.current = false;
@@ -131,6 +132,7 @@ export function VerifyOtpPage() {
 
   return (
     <FlowShell
+      step={1}
       eyebrow="Phone check"
       title="Verify your phone"
       subtitle={`We've sent a 6-digit code to ${maskedPhone || user?.phone || 'your phone'}.`}

@@ -49,3 +49,4 @@ class UserMeResponse(BaseModel):
     first_name: str
     phone_verified: bool
     role: str
+    application_status: str | None = None

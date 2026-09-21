@@ -14,32 +14,15 @@ from app.api import (
     vehicle,
 )
 from app.core.config import get_settings
-from app.core.security import hash_password
 from app.db.mongo import close_mongo_connection, connect_to_mongo
-from app.models import User, UserRole
-
-
-async def seed_admin() -> None:
-    settings = get_settings()
-    existing = await User.find_one(User.email == settings.admin_email.lower())
-    if existing:
-        return
-    admin_user = User(
-        first_name="Admin",
-        email=settings.admin_email.lower(),
-        phone=settings.admin_phone,
-        password_hash=hash_password(settings.admin_password),
-        phone_verified=True,
-        role=UserRole.ADMIN,
-    )
-    await admin_user.insert()
+from app.db.seed import seed_demo_data
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await connect_to_mongo()
-    get_settings().upload_path
-    await seed_admin()
+    get_settings().upload_path.mkdir(parents=True, exist_ok=True)
+    await seed_demo_data()
     yield
     await close_mongo_connection()
 

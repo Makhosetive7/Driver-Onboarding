@@ -14,7 +14,13 @@ from app.schemas import (
     TokenResponse,
     UserMeResponse,
 )
-from app.services import create_otp, get_or_create_profile, mask_phone, verify_user_otp
+from app.services import (
+    create_otp,
+    driver_application_status,
+    get_or_create_profile,
+    mask_phone,
+    verify_user_otp,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -76,6 +82,9 @@ async def login(payload: LoginRequest):
 
 @router.get("/me", response_model=UserMeResponse)
 async def me(user: User = Depends(get_current_user)):
+    application_status = None
+    if user.role == UserRole.DRIVER:
+        application_status = await driver_application_status(user.id)
     return UserMeResponse(
         id=str(user.id),
         email=user.email,
@@ -83,6 +92,7 @@ async def me(user: User = Depends(get_current_user)):
         first_name=user.first_name,
         phone_verified=user.phone_verified,
         role=user.role.value,
+        application_status=application_status,
     )
 
 

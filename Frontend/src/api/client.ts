@@ -45,6 +45,7 @@ export type UserMe = {
   first_name: string;
   phone_verified: boolean;
   role: string;
+  application_status?: string | null;
 };
 
 export type Profile = {

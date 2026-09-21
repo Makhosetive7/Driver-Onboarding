@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { FiArrowRight, FiFileText, FiLock, FiPhone, FiShield, FiTruck, FiUser } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import { postAuthPath } from '../lib/routes';
 
 const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
 const navEase = 'cubic-bezier(0.19, 1, 0.22, 1)';
@@ -980,13 +981,7 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
-  const startTo = user
-    ? user.role === 'ADMIN'
-      ? '/admin'
-      : user.phone_verified
-        ? '/dashboard'
-        : '/verify'
-    : '/register';
+  const startTo = user ? postAuthPath(user) : '/register';
 
   useEffect(() => {
     if (!menuOpen) return;

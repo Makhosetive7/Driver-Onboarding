@@ -128,7 +128,7 @@ export function IdentityPage() {
 
   return (
     <FlowShell
-      step={2}
+      step={3}
       eyebrow="Compliance"
       title="Identity verification"
       subtitle="Confirm who you are so we can verify your application."
