@@ -7,7 +7,14 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { api, type TokenResponse, type UserMe, wakeApi } from '../api/client';
+import {
+  api,
+  isUnauthorized,
+  type TokenResponse,
+  type UserMe,
+  wakeApi,
+  withWakeRetry,
+} from '../api/client';
 
 type AuthContextValue = {
   user: UserMe | null;
@@ -33,14 +40,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return null;
     }
     try {
-      const { data } = await api.get<UserMe>('/api/auth/me');
+      const data = await withWakeRetry(async () => {
+        const { data } = await api.get<UserMe>('/api/auth/me');
+        return data;
+      });
       setUser(data);
       setToken(stored);
       return data;
-    } catch {
-      localStorage.removeItem('token');
-      setUser(null);
-      setToken(null);
+    } catch (err) {
+      if (isUnauthorized(err)) {
+        localStorage.removeItem('token');
+        setUser(null);
+        setToken(null);
+      }
       return null;
     }
   }, []);

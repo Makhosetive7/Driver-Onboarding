@@ -24,6 +24,25 @@ export async function wakeApi(): Promise<void> {
   }
 }
 
+export function isApiUnreachable(error: unknown): boolean {
+  return axios.isAxiosError(error) && !error.response;
+}
+
+export function isUnauthorized(error: unknown): boolean {
+  return axios.isAxiosError(error) && error.response?.status === 401;
+}
+
+/** One retry after a cold start. Auth and validation errors are not retried. */
+export async function withWakeRetry<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (error) {
+    if (!isApiUnreachable(error)) throw error;
+    await wakeApi();
+    return run();
+  }
+}
+
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (!navigator.onLine) {
     return "You're offline. Check your internet connection and try again.";

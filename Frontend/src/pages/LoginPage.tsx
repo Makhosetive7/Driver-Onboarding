@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { z } from 'zod';
-import { api, getErrorMessage, type TokenResponse } from '../api/client';
+import { api, getErrorMessage, withWakeRetry, type TokenResponse } from '../api/client';
 import { AuthShell, AuthSwitchLink } from '../components/AuthShell';
 import { Alert, Button, ErrorText, Field, Input, Label } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
@@ -39,7 +39,10 @@ export function LoginPage() {
   const onSubmit = async (values: FormValues) => {
     setError('');
     try {
-      const { data } = await api.post<TokenResponse>('/api/auth/login', values);
+      const data = await withWakeRetry(async () => {
+        const { data } = await api.post<TokenResponse>('/api/auth/login', values);
+        return data;
+      });
       const me = await setSession(data.access_token);
       navigate(
         postAuthPath(
